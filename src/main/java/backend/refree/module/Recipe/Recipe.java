@@ -26,7 +26,7 @@ public class Recipe {
     private Double calorie;
     @Column(name = "image_url")
     private String imageUrl;
-    @Column(nullable = false)
+    @Column(length = 1000, nullable = false)
     private String ingredient;
     private String manuel1;
     @Column(name = "manuel_url1")
@@ -46,46 +46,4 @@ public class Recipe {
     private String manuel6;
     @Column(name = "manuel_url6")
     private String manuelUrl6;
-    private String manuel7;
-    @Column(name = "manuel_url7")
-    private String manuelUrl7;
-    private String manuel8;
-    @Column(name = "manuel_url8")
-    private String manuelUrl8;
-    private String manuel9;
-    @Column(name = "manuel_url9")
-    private String manuelUrl9;
-    private String manuel10;
-    @Column(name = "manuel_url10")
-    private String manuelUrl10;
-    private String manuel11;
-    @Column(name = "manuel_url11")
-    private String manuelUrl11;
-    private String manuel12;
-    @Column(name = "manuel_url12")
-    private String manuelUrl12;
-    private String manuel13;
-    @Column(name = "manuel_url13")
-    private String manuelUrl13;
-    private String manuel14;
-    @Column(name = "manuel_url14")
-    private String manuelUrl14;
-    private String manuel15;
-    @Column(name = "manuel_url15")
-    private String manuelUrl15;
-    private String manuel16;
-    @Column(name = "manuel_url16")
-    private String manuelUrl16;
-    private String manuel17;
-    @Column(name = "manuel_url17")
-    private String manuelUrl17;
-    private String manuel18;
-    @Column(name = "manuel_url18")
-    private String manuelUrl18;
-    private String manuel19;
-    @Column(name = "manuel_url19")
-    private String manuelUrl19;
-    private String manuel20;
-    @Column(name = "manuel_url20")
-    private String manuelUrl20;
 }
