@@ -12,8 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,12 +27,38 @@ public class RecipeService {
 
     @PostConstruct
     public void initRecipeData() throws IOException, ParseException {
-        ClassPathResource classPathResource = new ClassPathResource("test.json");
+        if (recipeRepository.count() == 0) {
+            ClassPathResource classPathResource1 = new ClassPathResource("recipe_data1.json");
+            ClassPathResource classPathResource2 = new ClassPathResource("recipe_data2.json");
+            ClassPathResource classPathResource3 = new ClassPathResource("recipe_data3.json");
+            ClassPathResource classPathResource4 = new ClassPathResource("recipe_data4.json");
+            ClassPathResource classPathResource5 = new ClassPathResource("recipe_data5.json");
+            /*ClassPathResource classPathResource6 = new ClassPathResource("recipe_data6.json");
+            ClassPathResource classPathResource7 = new ClassPathResource("recipe_data7.json");
+            ClassPathResource classPathResource8 = new ClassPathResource("recipe_data8.json");
+            ClassPathResource classPathResource9 = new ClassPathResource("recipe_data9.json");
+            ClassPathResource classPathResource10 = new ClassPathResource("recipe_data10.json");
+            ClassPathResource classPathResource11 = new ClassPathResource("recipe_data11.json");*/
 
+            saveRecipeData(classPathResource1);
+            saveRecipeData(classPathResource2);
+            saveRecipeData(classPathResource3);
+            saveRecipeData(classPathResource4);
+            saveRecipeData(classPathResource5);
+            /*saveRecipeData(classPathResource6);
+            saveRecipeData(classPathResource7);
+            saveRecipeData(classPathResource8);
+            saveRecipeData(classPathResource9);
+            saveRecipeData(classPathResource10);
+            saveRecipeData(classPathResource11);*/
+        }
+    }
+
+    private void saveRecipeData(ClassPathResource classPathResource) throws IOException, ParseException {
         List<Recipe> recipeList = new ArrayList<>();
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser
-                .parse(new InputStreamReader(classPathResource.getInputStream(), "UTF-8"));
+                .parse(new InputStreamReader(classPathResource.getInputStream(), StandardCharsets.UTF_8));
 
         JSONObject cookObject = (JSONObject) jsonObject.get("COOKRCP01");
         JSONArray recipeArray = (JSONArray) cookObject.get("row");
@@ -53,37 +82,51 @@ public class RecipeService {
                     .manuelUrl5((String) recipeObject.get("MANUAL_IMG05"))
                     .manuel6((String) recipeObject.get("MANUAL06"))
                     .manuelUrl6((String) recipeObject.get("MANUAL_IMG06"))
-                    .manuel7((String) recipeObject.get("MANUAL07"))
-                    .manuelUrl7((String) recipeObject.get("MANUAL_IMG07"))
-                    .manuel8((String) recipeObject.get("MANUAL08"))
-                    .manuelUrl8((String) recipeObject.get("MANUAL_IMG08"))
-                    .manuel9((String) recipeObject.get("MANUAL09"))
-                    .manuelUrl9((String) recipeObject.get("MANUAL_IMG09"))
-                    .manuel10((String) recipeObject.get("MANUAL10"))
-                    .manuelUrl10((String) recipeObject.get("MANUAL_IMG10"))
-                    .manuel11((String) recipeObject.get("MANUAL11"))
-                    .manuelUrl11((String) recipeObject.get("MANUAL_IMG11"))
-                    .manuel12((String) recipeObject.get("MANUAL12"))
-                    .manuelUrl12((String) recipeObject.get("MANUAL_IMG12"))
-                    .manuel13((String) recipeObject.get("MANUAL13"))
-                    .manuelUrl13((String) recipeObject.get("MANUAL_IMG13"))
-                    .manuel14((String) recipeObject.get("MANUAL14"))
-                    .manuelUrl14((String) recipeObject.get("MANUAL_IMG14"))
-                    .manuel15((String) recipeObject.get("MANUAL15"))
-                    .manuelUrl15((String) recipeObject.get("MANUAL_IMG15"))
-                    .manuel16((String) recipeObject.get("MANUAL16"))
-                    .manuelUrl16((String) recipeObject.get("MANUAL_IMG16"))
-                    .manuel17((String) recipeObject.get("MANUAL17"))
-                    .manuelUrl17((String) recipeObject.get("MANUAL_IMG17"))
-                    .manuel18((String) recipeObject.get("MANUAL18"))
-                    .manuelUrl18((String) recipeObject.get("MANUAL_IMG18"))
-                    .manuel19((String) recipeObject.get("MANUAL19"))
-                    .manuelUrl19((String) recipeObject.get("MANUAL_IMG19"))
-                    .manuel20((String) recipeObject.get("MANUAL20"))
-                    .manuelUrl20((String) recipeObject.get("MANUAL_IMG20"))
                     .build();
             recipeList.add(recipe);
         }
         recipeRepository.saveAll(recipeList);
+    }
+
+    public List<RecipeDto> recommend(List<String> Ingredients) {
+        ArrayList<RecipeCount> recipeCounts = new ArrayList<>();
+        for (long i = 0; i < 1115; i++) {
+            recipeCounts.add(RecipeCount.createRecipeCount(i));
+        }
+
+        for (String ingredient : Ingredients) {
+            recipeRepository.findByIngredientContains(ingredient).forEach(recipe ->
+                recipeCounts.get(recipe.getId().intValue()).plusCount()
+            );
+        }
+
+        // count를 기준으로 내림차순 정렬
+        recipeCounts.sort(new Comparator<RecipeCount>() {
+            @Override
+            public int compare(RecipeCount o1, RecipeCount o2) {
+                return Integer.compare(o2.getCount(), o1.getCount());
+            }
+        });
+
+        List<Long> recipeIds = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            RecipeCount recipeCount = recipeCounts.get(i);
+            if (recipeCount.getCount() == 0) {
+                break;
+            }
+            recipeIds.add(recipeCount.getRecipeId());
+        }
+        if (recipeIds.size() != 0) {
+            List<Recipe> recipeResultList = recipeRepository.findByIn(recipeIds);
+            return recipeResultList.stream()
+                    .map(recipe -> RecipeDto.builder()
+                            .id(recipe.getId())
+                            .name(recipe.getName())
+                            .calorie(recipe.getCalorie())
+                            .ingredient(recipe.getIngredient())
+                            .image(recipe.getImageUrl())
+                            .build()).collect(Collectors.toList());
+        }
+        return List.of();
     }
 }
