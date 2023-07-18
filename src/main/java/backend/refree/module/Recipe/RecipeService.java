@@ -117,7 +117,19 @@ public class RecipeService {
             recipeIds.add(recipeCount.getRecipeId());
         }
         if (recipeIds.size() != 0) {
-            List<Recipe> recipeResultList = recipeRepository.findByIn(recipeIds);
+            return recipeIds.stream() // 우선 순위대로 내려주는 방식
+                    .map(recipeId -> {
+                        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(()
+                                -> new IllegalArgumentException("Bad Request"));
+                        return RecipeDto.builder()
+                                .id(recipe.getId())
+                                .name(recipe.getName())
+                                .calorie(recipe.getCalorie())
+                                .ingredient(recipe.getIngredient())
+                                .image(recipe.getImageUrl())
+                                .build();
+                    }).collect(Collectors.toList());
+            /*List<Recipe> recipeResultList = recipeRepository.findByIn(recipeIds); // 우선 순위를 고려하지 않은 방식
             return recipeResultList.stream()
                     .map(recipe -> RecipeDto.builder()
                             .id(recipe.getId())
@@ -125,7 +137,7 @@ public class RecipeService {
                             .calorie(recipe.getCalorie())
                             .ingredient(recipe.getIngredient())
                             .image(recipe.getImageUrl())
-                            .build()).collect(Collectors.toList());
+                            .build()).collect(Collectors.toList());*/
         }
         return List.of();
     }
