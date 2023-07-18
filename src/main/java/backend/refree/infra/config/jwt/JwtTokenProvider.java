@@ -1,4 +1,4 @@
-package backend.refree.infra.config.jwtToken;
+package backend.refree.infra.config.jwt;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

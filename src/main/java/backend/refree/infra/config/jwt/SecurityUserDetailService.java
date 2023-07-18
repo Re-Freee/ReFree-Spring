@@ -1,4 +1,4 @@
-package backend.refree.infra.config.jwtToken;
+package backend.refree.infra.config.jwt;
 
 import backend.refree.module.Member.*;
 import lombok.RequiredArgsConstructor;

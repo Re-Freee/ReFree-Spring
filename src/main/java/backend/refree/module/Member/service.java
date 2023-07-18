@@ -1,6 +1,6 @@
 package backend.refree.module.Member;
 
-import backend.refree.infra.config.jwtToken.JwtTokenProvider;
+import backend.refree.infra.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
