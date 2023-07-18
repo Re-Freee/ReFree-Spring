@@ -1,6 +1,7 @@
 package backend.refree.module.Member;
 
 import lombok.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -31,4 +32,11 @@ public class memberEntity {
     @Column(name = "nickname", length = 8, nullable = false)
     private String nickname;
 
+    public void encodePassword(PasswordEncoder passwordEncoder){
+        this.password = passwordEncoder.encode(password);
+    }
+
+    public void encodeCheckPassword(PasswordEncoder passwordEncoder){
+        this.checkPassword = passwordEncoder.encode(checkPassword);
+    }
 }
