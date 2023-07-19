@@ -5,13 +5,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SingleResponse extends BasicResponse {
+public class ErrorResponse extends BasicResponse {
 
     private int code;
     private String message;
 
-    public SingleResponse(String message) {
-        this.code = 200;
+    public ErrorResponse(int errorCode, String message) {
+        this.code = errorCode;
         this.message = message;
     }
 }

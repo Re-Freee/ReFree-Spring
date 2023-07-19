@@ -1,5 +1,7 @@
 package backend.refree.module.Recipe;
 
+import backend.refree.infra.exception.BadRequestException;
+import backend.refree.infra.exception.PaymentRequiredException;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -120,7 +122,7 @@ public class RecipeService {
             return recipeIds.stream() // 우선 순위대로 내려주는 방식
                     .map(recipeId -> {
                         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(()
-                                -> new IllegalArgumentException("Bad Request"));
+                                -> new BadRequestException("BAD_REQUEST"));
                         return RecipeDto.builder()
                                 .id(recipe.getId())
                                 .name(recipe.getName())
