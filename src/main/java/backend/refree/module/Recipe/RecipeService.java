@@ -35,24 +35,24 @@ public class RecipeService {
             ClassPathResource classPathResource3 = new ClassPathResource("recipe_data3.json");
             ClassPathResource classPathResource4 = new ClassPathResource("recipe_data4.json");
             ClassPathResource classPathResource5 = new ClassPathResource("recipe_data5.json");
-            /*ClassPathResource classPathResource6 = new ClassPathResource("recipe_data6.json");
+            ClassPathResource classPathResource6 = new ClassPathResource("recipe_data6.json");
             ClassPathResource classPathResource7 = new ClassPathResource("recipe_data7.json");
             ClassPathResource classPathResource8 = new ClassPathResource("recipe_data8.json");
             ClassPathResource classPathResource9 = new ClassPathResource("recipe_data9.json");
             ClassPathResource classPathResource10 = new ClassPathResource("recipe_data10.json");
-            ClassPathResource classPathResource11 = new ClassPathResource("recipe_data11.json");*/
+            ClassPathResource classPathResource11 = new ClassPathResource("recipe_data11.json");
 
             saveRecipeData(classPathResource1);
             saveRecipeData(classPathResource2);
             saveRecipeData(classPathResource3);
             saveRecipeData(classPathResource4);
             saveRecipeData(classPathResource5);
-            /*saveRecipeData(classPathResource6);
+            saveRecipeData(classPathResource6);
             saveRecipeData(classPathResource7);
             saveRecipeData(classPathResource8);
             saveRecipeData(classPathResource9);
             saveRecipeData(classPathResource10);
-            saveRecipeData(classPathResource11);*/
+            saveRecipeData(classPathResource11);
         }
     }
 
