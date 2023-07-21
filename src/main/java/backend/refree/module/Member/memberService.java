@@ -9,9 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 
 @Service
 @RequiredArgsConstructor
-public class service {
+public class memberService {
 
-    private final repository repository;
+    private final MemberRepository MemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -20,12 +20,12 @@ public class service {
         memberEntity member = memberSignupDto.toEntity();
 
         // 이미 존재하는 이메일
-        if (repository.findByEmail(memberSignupDto.email).isPresent()){
+        if (MemberRepository.findByEmail(memberSignupDto.getEmail()).isPresent()){
             throw new MemberException(MemberExceptionType.ALREADY_EXIST_EMAIL);
         }
 
         // 비밀번호 일치하지 않음
-        if (memberSignupDto.password.equals(memberSignupDto.checkPassword) == false) {
+        if (memberSignupDto.getPassword().equals(memberSignupDto.getCheckPassword()) == false) {
             throw new MemberException(MemberExceptionType.NOT_MATCH_PASSWORD);
         }
 
@@ -36,15 +36,15 @@ public class service {
         member.encodePassword(passwordEncoder);
         member.encodeCheckPassword(passwordEncoder);
 
-        repository.save(member);
+        MemberRepository.save(member);
 
         return messageModel;
     }
 
     MessageModel login(MemberLoginDto memberLoginDto, HttpServletResponse response) {
-        memberEntity member = repository.findByEmail(memberLoginDto.email)
+        memberEntity member = MemberRepository.findByEmail(memberLoginDto.getEmail())
                 .orElseThrow(() -> new MemberException(MemberExceptionType.NOT_MATCH_MEMBER)); // 존재하지 않는 계정
-        if (!passwordEncoder.matches(memberLoginDto.password, member.getPassword())){
+        if (!passwordEncoder.matches(memberLoginDto.getPassword(), member.getPassword())){
             throw new MemberException(MemberExceptionType.NOT_MATCH_PASSWORD); // 일치하지 않는 비밀번호
         }
 

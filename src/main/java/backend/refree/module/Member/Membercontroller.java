@@ -8,15 +8,15 @@ import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RestController
-public class controller {
+public class Membercontroller {
 
-    private final service service;
+    private final memberService memberService;
 
     // 회원가입
     @PostMapping("/signup")
     @ResponseBody
     public Object signup(@RequestBody @Valid MemberSignupDto memberSignupDto)  {
-        MessageModel messageModel = service.signup(memberSignupDto);
+        MessageModel messageModel = memberService.signup(memberSignupDto);
         return messageModel;
     }
 
@@ -24,7 +24,7 @@ public class controller {
     @PostMapping("/login")
     @ResponseBody
     public Object login(@RequestBody @Valid MemberLoginDto memberLoginDto, HttpServletResponse response) {
-        MessageModel messageModel = service.login(memberLoginDto, response);
+        MessageModel messageModel = memberService.login(memberLoginDto, response);
         return messageModel;
     }
 

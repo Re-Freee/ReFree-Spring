@@ -1,4 +1,4 @@
-package backend.refree.infra.exception;
+package backend.refree.infra.exception2;
 
 import org.springframework.http.HttpStatus;
 

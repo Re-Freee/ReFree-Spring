@@ -13,7 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SecurityUserDetailService implements UserDetailsService {
 
-    private repository memberReporitory;
+    private MemberRepository memberReporitory;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{

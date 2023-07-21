@@ -1,6 +1,6 @@
 package backend.refree.module.Member;
 
-import backend.refree.infra.exception.BaseExceptionType;
+import backend.refree.infra.exception2.BaseExceptionType;
 import org.springframework.http.HttpStatus;
 
 public enum MemberExceptionType implements BaseExceptionType {

@@ -1,4 +1,4 @@
-package backend.refree.infra.exception;
+package backend.refree.infra.exception2;
 
 public abstract class BaseException extends RuntimeException {
     public abstract BaseExceptionType getExceptionType();
