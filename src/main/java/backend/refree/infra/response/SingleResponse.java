@@ -1,5 +1,6 @@
 package backend.refree.infra.response;
 
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,11 @@ public class SingleResponse extends BasicResponse {
 
     public SingleResponse(String message) {
         this.code = 200;
+        this.message = message;
+    }
+
+    public SingleResponse(int code, String message) {
+        this.code = code;
         this.message = message;
     }
 }

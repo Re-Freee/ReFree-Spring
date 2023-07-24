@@ -7,24 +7,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
-public class SecurityUserDetailService implements UserDetailsService {
+public class PrincipalDetailsService implements UserDetailsService {
 
-    private MemberRepository memberReporitory;
+    private final MemberRepository memberRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
-        Optional<memberEntity> optional = memberReporitory.findByEmail(username);
-        if(!optional.isPresent()){
-            throw new UsernameNotFoundException(username + " 사용자 없음");
-        }
-        else{
-            memberEntity member = optional.get();
-            return new SecurityUser(member);
-        }
+        memberEntity member = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 없음"));
+
+        return new SecurityUser(member);
     }
 
 }

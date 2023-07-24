@@ -6,13 +6,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Objects;
+
 @Slf4j
 @RestControllerAdvice // 모든 Controller 전역에서 발생할 수 있는 예외를 잡아 처리해주는 어노테이션 - filter에서 발생하는 에러 제외
 public class ExceptionController {
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<? extends BasicResponse> UserNotFoundException(MemberException e){
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(MemberException.class)
+    public ResponseEntity<? extends BasicResponse> MemberException(MemberException e){
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+    }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<? extends BasicResponse> BadRequestException(BadRequestException e) {
@@ -70,7 +87,8 @@ public class ExceptionController {
             MethodArgumentNotValidException e) {
         e.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "NOT_VALID_EXCEPTION"));
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                        Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage()));
     }
 
     @ExceptionHandler(Exception.class)
