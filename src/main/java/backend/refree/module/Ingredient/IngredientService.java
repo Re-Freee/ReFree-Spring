@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +80,8 @@ public class IngredientService {
     }
     public List<Ingredient> closure(int mem_id){ //유통기한이 3일 남은 경우
         List<Ingredient> check=findAllIngredient(mem_id);
-        List<Ingredient> confirm = null;
+        List<Ingredient> confirm = new ArrayList<>();
+        int[] month={0,31,29,31,30,31,30,31,30,31,30,31,30};
         for(int i=0;i<check.size();i++){
             Date expire=check.get(i).getPeriod();
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -92,21 +94,38 @@ public class IngredientService {
             String formatted2=dateFormat.format(currentDate);
             String[] format2=formatted2.split("-");
 
-            if(format2[0].equals(format2[0])&&format2[1].equals(format2[1])){
-                if(Integer.parseInt(format[2])-Integer.parseInt(format2[2])<=3){
-                    confirm.add(check.get(i));
-                    continue;
+            if(format[0].equals(format2[0])){//같은 년도, 같은 달
+                if (format[1].equals(format2[1])){//같은 달
+                    if(Integer.parseInt(format[2])-Integer.parseInt(format2[2])<=3 && Integer.parseInt(format[2])-Integer.parseInt(format2[2])>=0) {
+                        confirm.add(check.get(i));
+                    }
+                }
+                else {//다른 달
+                    if(Integer.parseInt(format[0])-Integer.parseInt(format2[0])==1){
+                        int checked=month[Integer.parseInt(format2[1])]-Integer.parseInt(format2[2])+1;
+                        int checking=checked+Integer.parseInt(format[2]);
+                        if (checking<=3 && checking>=0){
+                            confirm.add(check.get(i));
+                        }
+                    }
+                }
+            }
+            else if(Integer.parseInt(format[0])-Integer.parseInt(format2[0])==1){//다른 년도 12, 1월인 경우
+                if(Integer.parseInt(format[1])==1&&Integer.parseInt(format2[1])==12){
+                    int checked=month[Integer.parseInt(format2[1])]-Integer.parseInt(format2[2])+1;
+                    int checking=checked+Integer.parseInt(format[2]);
+                    if (checking<=3 && checking>=0){
+                        confirm.add(check.get(i));
+                    }
                 }
             }
 
-
-            confirm.add(check.get(i));
         }
         return confirm;
     }
     public List<Ingredient> end(int mem_id){
         List<Ingredient> check=findAllIngredient(mem_id);
-        List<Ingredient> confirm = null;
+        List<Ingredient> confirm =new ArrayList<>();
         for(int i=0;i<check.size();i++){
             Date expire=check.get(i).getPeriod();
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -121,18 +140,13 @@ public class IngredientService {
 
             if(Integer.parseInt(format2[0])-Integer.parseInt(format[0])>0){
                 confirm.add(check.get(i));
-                continue;
             }
-            else if(Integer.parseInt(format2[1])-Integer.parseInt(format[1])>0){
+            else if(format2[0].equals(format[0])&&Integer.parseInt(format2[1])-Integer.parseInt(format[1])>0){
                 confirm.add(check.get(i));
-                continue;
             }
-            else if(Integer.parseInt(format2[2])-Integer.parseInt(format[2])>0){
+            else if(format2[0].equals(format[0])&&format2[1].equals(format[1])&&Integer.parseInt(format2[2])-Integer.parseInt(format[2])>0){
                 confirm.add(check.get(i));
-                continue;
             }
-
-            confirm.add(check.get(i));
         }
         return confirm;
     }
@@ -143,7 +157,8 @@ public class IngredientService {
         return check;
     }
     public List<Ingredient> search(String searchKey,int mem_id){
-        return ingredientRepository.search(searchKey,mem_id);
+        String searchKey1="%"+searchKey+"%";
+        return ingredientRepository.search(searchKey1,mem_id);
     }
 
 }

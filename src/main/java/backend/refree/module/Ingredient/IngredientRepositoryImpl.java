@@ -14,19 +14,32 @@ import static backend.refree.module.Ingredient.QIngredient.ingredient;
 @RequiredArgsConstructor
 public class IngredientRepositoryImpl implements  IngredientRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
+//    @Override
+//    Optional<Ingredient> findByIngred(int ingredient_id){
+//        return jpaQueryFactory
+//                .selectFrom(ingredient)
+//                .where(ingredient.ingredient_id.eq(ingredient_id))
+//                .fetch();
+//
+//    }
     @Override
     public List<Ingredient> findAllIngredient(int mem_id) {
         return jpaQueryFactory
                 .selectFrom(ingredient)
-                .where(ingredient.ingredient_id.eq(mem_id))
+                .where(ingredient.member_id.eq(mem_id))
                 .fetch();
     }
     @Override
     public List<Ingredient> search(String searchKey,int mem_id){
+//        System.out.println(jpaQueryFactory
+//                .selectFrom(ingredient)
+//                .where(ingredient.member_id.eq(mem_id))
+//                .fetch());
+//      ingredient.member_id.eq(mem_id).and(ingredient.name.like(searchKey))
         return jpaQueryFactory
                 .selectFrom(ingredient)
-                .where(ingredient.name.contains(searchKey),ingredient.ingredient_id.eq(mem_id))
-                .fetch();
+                .where(ingredient.member_id.eq(mem_id).and(ingredient.name.like(searchKey)))
+                .fetch();//,ingredient.ingredient_id.eq(mem_id)ingredient.name.contains(searchKey),
     }
 //        List<Ingredient> check=em.createQuery("select v from Ingredient v where u.member_id:=id",Ingredient.class)
 //                .setParameter("id",mem_id)

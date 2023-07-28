@@ -6,14 +6,14 @@ import java.sql.Date;
 @Entity
 public class Ingredient {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "idIngredient_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ingredient_id")
     private int ingredient_id;
     private String name;
     private Date period;
     private int quantity;
     private String content;
-    private int option;
+    private int options;
     @Column(name = "Member_member_id")
     private int member_id;
     @Column(name = "Image_image")
@@ -59,12 +59,12 @@ public class Ingredient {
         this.content = content;
     }
 
-    public int getOption() {
-        return option;
+    public int getOptions() {
+        return options;
     }
 
-    public void setOption(int option) {
-        this.option = option;
+    public void setOptions(int options) {
+        this.options = options;
     }
 
     public int getMember_id() {
