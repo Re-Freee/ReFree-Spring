@@ -20,7 +20,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    @PostConstruct
+    /*@PostConstruct
     public void initCategoryData() throws IOException {
         if (categoryRepository.count() == 0) {
             ClassPathResource classPathResource = new ClassPathResource("category_data.txt");
@@ -42,5 +42,5 @@ public class CategoryService {
             }
             categoryRepository.saveAll(categoryList);
         }
-    }
+    }*/
 }

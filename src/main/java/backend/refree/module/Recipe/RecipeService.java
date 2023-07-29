@@ -30,7 +30,7 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final CategoryRepository categoryRepository;
 
-    @PostConstruct
+    /*PostConstruct
     public void initRecipeData() throws IOException, ParseException {
         if (recipeRepository.count() == 0) {
             ClassPathResource classPathResource1 = new ClassPathResource("recipe_data1.json");
@@ -57,7 +57,7 @@ public class RecipeService {
             saveRecipeData(classPathResource10);
             saveRecipeData(classPathResource11);
         }
-    }
+    }*/
 
     private void saveRecipeData(ClassPathResource classPathResource) throws IOException, ParseException {
         List<Recipe> recipeList = new ArrayList<>();
