@@ -1,7 +1,9 @@
 package backend.refree.module.Recipe;
 
 import backend.refree.infra.exception.BadRequestException;
+import backend.refree.infra.exception.NotFoundException;
 import backend.refree.infra.exception.PaymentRequiredException;
+import backend.refree.module.Category.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final CategoryRepository categoryRepository;
 
     @PostConstruct
     public void initRecipeData() throws IOException, ParseException {
@@ -91,6 +94,11 @@ public class RecipeService {
     }
 
     public List<RecipeDto> recommend(List<String> Ingredients) {
+        Ingredients.forEach(i -> {
+            if (!categoryRepository.existsByName(i))
+                throw new NotFoundException("존재하지 않는 재료");
+        });
+
         ArrayList<RecipeCount> recipeCounts = new ArrayList<>();
         for (long i = 0; i < 1115; i++) {
             recipeCounts.add(RecipeCount.createRecipeCount(i));
