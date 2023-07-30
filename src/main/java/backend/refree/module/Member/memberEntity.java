@@ -1,6 +1,7 @@
 package backend.refree.module.Member;
 
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Entity
 @Builder
 @Table(name = "Member")
+@DynamicUpdate
 public class memberEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,5 +39,13 @@ public class memberEntity {
 
     public void encodeCheckPassword(PasswordEncoder passwordEncoder){
         this.checkPassword = passwordEncoder.encode(checkPassword);
+    }
+
+    public void updatePassword(String newPassword){
+        this.password = newPassword;
+    }
+
+    public void updateCheckPassword(String newCheckPassword){
+        this.checkPassword = newCheckPassword;
     }
 }

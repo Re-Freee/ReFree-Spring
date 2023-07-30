@@ -1,5 +1,7 @@
 package backend.refree.infra.config.jwt;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import lombok.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +17,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import io.jsonwebtoken.*;
 
+import static backend.refree.module.Analysis.KomoranUtils.log;
+
 @RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
@@ -25,6 +29,7 @@ public class JwtTokenProvider {
     // 토큰 유효시간 = 7일
     @Value("${EXPIRE_TIME}")
     private long tokenValidTime;
+
     private final PrincipalDetailsService userDetailsService;
 
     // 객체 초기화
@@ -33,21 +38,25 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
+    /*
     // Jwt 토큰 생성
-    public String createToken(String memberEmail){
-        Claims claims = Jwts.claims().setSubject(memberEmail);
-        Date now = new Date();
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+    public String createToken(Authentication authentication){
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        String token = JWT.create()
+                .withSubject("jwt-token")
+                .withExpiresAt(new Date(System.currentTimeMillis() + 6000 * 60 * 24 * 7))
+                .withClaim("email", principalDetails.getMember().getEmail())
+                .sign(Algorithm.HMAC512(secretKey));
+
+        return token;
     }
+
+     */
 
     // JWT 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
-        String email = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        String email = (String) Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("email");
+        log.info("email: " + email);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
@@ -55,7 +64,7 @@ public class JwtTokenProvider {
     // Request의 Header에서 token 값을 가져온다. "Authorization": "TOKEN 값"
     public String resolveToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        if (token != null) return token.substring("Bearer ".length());
+        if (token != null && token.startsWith("Bearer")) return token.substring("Bearer ".length());
         return request.getHeader("Authorization");
     }
 

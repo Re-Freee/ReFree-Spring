@@ -1,40 +1,106 @@
 package backend.refree.infra.config.jwt;
 
 import backend.refree.infra.exception.MemberException;
-import io.jsonwebtoken.Claims;
+import backend.refree.infra.response.SingleResponse;
+import backend.refree.module.Member.MemberLoginDto;
+import backend.refree.module.Member.MemberRepository;
+import backend.refree.module.Member.memberEntity;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.Optional;
 
-import static backend.refree.module.Analysis.KomoranUtils.log;
-
+@Slf4j
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+    private final PrincipalDetailsService principalDetailsService;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
-    private final JwtTokenProvider jwtTokenProvider;
+    @Value("${SECRET}")
+    private String secretKey = "b244YXByaWwwMgo=";
+
+    // login 요청 시 로그인 시도를 위해 실행
+    @SneakyThrows
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        log.info("로그인 시도: JwtAuthenticationFilter.attemptAuthentication");
+
+        try{
+            MemberLoginDto login = objectMapper.readValue(request.getInputStream(), MemberLoginDto.class);
+
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword());
+            log.info(authenticationToken.getPrincipal().toString());
+            log.info(authenticationToken.getCredentials().toString());
+
+            String email = authenticationToken.getName();
+            String password = (String) authenticationToken.getCredentials();
+
+            UserDetails userDetails = principalDetailsService.loadUserByUsername(email);
+            if (passwordEncoder.matches(password, userDetails.getPassword()) == false){
+                throw new MemberException("비밀번호가 일치하지 않습니다.");
+            }
+
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+
+            log.info("LOGIN SUCCESS");
+
+            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+            log.info("email: " + principalDetails.getMember().getEmail());
+            log.info("password: " + principalDetails.getMember().getPassword());
+
+            return authentication;
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        // 헤더에서 JWT 를 받아옴
-        String token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
-        // 유효한 토큰인지 확인
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            // 토큰이 유효하면 토큰으로부터 유저 정보를 받아온다
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            // SecurityContext 에 Authentication 객체를 저장한다.
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-        else{
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException{
+        log.info("인증 완료: JwtAuthenticationFilter.successfulAuthentication");
 
-        }
-        chain.doFilter(request, response);
+        PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
+        String token = JWT.create()
+                .withSubject("jwt-token")
+                .withExpiresAt(new Date(System.currentTimeMillis() + 6000 * 60 * 24 * 7))
+                .withClaim("email", principalDetails.getMember().getEmail())
+                .sign(Algorithm.HMAC512(secretKey));
+
+        response.setHeader("Authorization", "Bearer " + token);
+
+        response.setContentType("application/json");
+        SingleResponse singleResponse = new SingleResponse(200, "Login Complete!");
+        String result = objectMapper.writeValueAsString(singleResponse);
+        response.getWriter().write(result);
+
+        log.info("token: Bearer " + token);
     }
+
 }
