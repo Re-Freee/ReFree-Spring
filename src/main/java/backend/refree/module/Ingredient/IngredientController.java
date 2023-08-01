@@ -30,8 +30,8 @@ public class IngredientController {
     }
     //재료 수량 조절
     @PutMapping("/delete")
-    public ResponseEntity<? extends BasicResponse> delete(@RequestParam int ingred_id,@RequestParam int cnt){
-        return ResponseEntity.ok().body(new GeneralResponse<>(ingredientService.delete(ingred_id,cnt),"DELETE_SUCCESS"));
+    public ResponseEntity<? extends BasicResponse> delete(@RequestParam int ingred_id,@RequestParam int cnt,@RequestParam String memo){
+        return ResponseEntity.ok().body(new GeneralResponse<>(ingredientService.delete(ingred_id,cnt,memo),"DELETE_SUCCESS"));
     }
     //재료 소비기한 임박
     @GetMapping("/closure")

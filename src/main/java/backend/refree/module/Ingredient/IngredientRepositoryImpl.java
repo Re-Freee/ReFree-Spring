@@ -52,10 +52,11 @@ public class IngredientRepositoryImpl implements  IngredientRepositoryCustom{
 //        }
 //        return confirm;
     @Override
-    public void delete(int ingredient_id,int cnt){
+    public void delete(int ingredient_id,int cnt,String memo){
         jpaQueryFactory
                 .update(ingredient)
                 .set(ingredient.quantity,cnt)
+                .set(ingredient.content,memo)
                 .where(ingredient.ingredient_id.eq(ingredient_id))
                 .execute();
 //        em.createQuery("update Ingredient u set u.quantity=:quantity")

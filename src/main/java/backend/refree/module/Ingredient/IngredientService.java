@@ -1,6 +1,10 @@
 package backend.refree.module.Ingredient;
 
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -14,9 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Transactional
 @Component
@@ -24,6 +26,72 @@ public class IngredientService {
     private final IngredientRepository ingredientRepository;
     public IngredientService(IngredientRepository ingredientRepository){
         this.ingredientRepository=ingredientRepository;
+    }
+    public String ingredientToCategory(String inputs)  throws IOException, ParseException {
+        StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1390802/AgriFood/FdFood/getKoreanFoodFdFoodList"); /*URL*/
+        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=JFijwchWJy3Nc6ZJO%2BLrky1imhAw43gItboKn2EuJbkrJJhPd13DziheNccSaKwmHiPc%2FDz4Jx8Z5mvH5JG5bg%3D%3D"); /*Service Key*/
+        urlBuilder.append("&" + URLEncoder.encode("service_Type","UTF-8") + "=" + URLEncoder.encode("json", "UTF-8")); /*xml 과 json 형식 지원*/
+        urlBuilder.append("&" + URLEncoder.encode("Page_No","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지 번호*/
+        urlBuilder.append("&" + URLEncoder.encode("Page_Size","UTF-8") + "=" + URLEncoder.encode("20", "UTF-8")); /*한 페이지 결과 수*/
+        urlBuilder.append("&" + URLEncoder.encode("food_Name","UTF-8") + "=" + URLEncoder.encode(inputs, "UTF-8")); /*음식 명 (검색어 입력값 포함 검색)*/
+        URL url = new URL(urlBuilder.toString());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Content-type", "application/json");
+        System.out.println("Response code: " + conn.getResponseCode());
+        BufferedReader rd;
+        if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
+            rd = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+        } else {
+            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8));
+        }
+
+
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse(rd);
+
+        rd.close();
+        conn.disconnect();
+        JSONObject cookObject=(JSONObject) jsonObject.get("response");
+        JSONArray recipeArray=(JSONArray) cookObject.get("list");
+        String index;
+        List<String> confirm=new ArrayList<>();
+        for(int i=0;i<recipeArray.size();i++){
+            JSONObject recipeObject=(JSONObject) recipeArray.get(i); //no 1을 가지고 온다
+            JSONArray recipeArray1=(JSONArray) recipeObject.get("food_List");
+            for(int j=0;j<recipeArray1.size();j++){
+                JSONObject checks=(JSONObject) recipeArray1.get(j);
+                index=(String)checks.get("fd_Eng_Nm");
+                confirm.add(index);
+            }
+        }
+        List<String> outside=new ArrayList<>();
+        for(int i=0;i<confirm.size();i++){
+            String inside=confirm.get(i);
+            String[] insideArray=inside.split(",");
+            outside.add(insideArray[0]);
+        }
+
+        // 각 원소의 빈도를 계산하여 Map에 저장
+        Map<String, Integer> frequencyMap = new HashMap<>();
+        for (String element : outside) {
+            frequencyMap.put(element, frequencyMap.getOrDefault(element, 0) + 1);
+        }
+
+        // 최댓값을 찾기 위해 최댓값을 초기화
+        int maxFrequency = 0;
+        String mostFrequentElement = null;
+
+        // Map의 엔트리들을 순회하면서 최댓값을 찾음
+        for (Map.Entry<String, Integer> entry : frequencyMap.entrySet()) {
+            String element = entry.getKey();
+            int frequency = entry.getValue();
+            if (frequency > maxFrequency) {
+                maxFrequency = frequency;
+                mostFrequentElement = element;
+            }
+        }
+        return mostFrequentElement;
     }
     public void create(Ingredient ingredient) throws IOException {
         final String inputs=ingredient.getName();//땅콩밥, 방울토마토, 흑토마토, 롤케이크
@@ -150,10 +218,11 @@ public class IngredientService {
         }
         return confirm;
     }
-    public Ingredient delete(int ingred_id, int cnt){
-        ingredientRepository.delete(ingred_id,cnt);
+    public Ingredient delete(int ingred_id, int cnt,String memo){
+        ingredientRepository.delete(ingred_id,cnt,memo);
         Ingredient check=view(ingred_id);
         check.setQuantity(cnt);
+        check.setContent(memo);
         return check;
     }
     public List<Ingredient> search(String searchKey,int mem_id){
