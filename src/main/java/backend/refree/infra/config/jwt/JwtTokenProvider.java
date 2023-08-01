@@ -22,7 +22,6 @@ public class JwtTokenProvider {
     @Value("${SECRET}")
     private String secretKey;
 
-    // 토큰 유효시간 = 7일
     @Value("${EXPIRE_TIME}")
     private long tokenValidTime;
     private final PrincipalDetailsService userDetailsService;
