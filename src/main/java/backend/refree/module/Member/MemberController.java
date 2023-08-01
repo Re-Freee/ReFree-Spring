@@ -31,9 +31,9 @@ public class MemberController {
         return ResponseEntity.ok().body(memberService.search(memberPwSearchDto));
     }
 
-    @PostMapping("/login/search/modify/{email}")
-    public ResponseEntity<? extends BasicResponse> modify(@PathVariable String email, @RequestBody @Valid MemberPwModifyDto memberPwModifyDto)  {
-        return ResponseEntity.ok().body(memberService.modify(email, memberPwModifyDto));
+    @PostMapping("/login/search/modify")
+    public ResponseEntity<? extends BasicResponse> modify(@RequestBody @Valid MemberPwModifyDto memberPwModifyDto)  {
+        return ResponseEntity.ok().body(memberService.modify(memberPwModifyDto));
     }
 
     // 토큰 인가 check 

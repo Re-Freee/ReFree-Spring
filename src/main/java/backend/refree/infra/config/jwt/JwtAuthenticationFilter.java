@@ -3,8 +3,6 @@ package backend.refree.infra.config.jwt;
 import backend.refree.infra.exception.MemberException;
 import backend.refree.infra.response.SingleResponse;
 import backend.refree.module.Member.MemberLoginDto;
-import backend.refree.module.Member.MemberRepository;
-import backend.refree.module.Member.memberEntity;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,27 +10,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,9 +32,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final PrincipalDetailsService principalDetailsService;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${SECRET}")
-    private String secretKey = "b244YXByaWwwMgo=";
-
+    @Value("${spring.security.jwt.SECRET}")
+    private final String secretKey;
     // login 요청 시 로그인 시도를 위해 실행
     @SneakyThrows
     @Override
@@ -102,5 +91,4 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         log.info("token: Bearer " + token);
     }
-
 }

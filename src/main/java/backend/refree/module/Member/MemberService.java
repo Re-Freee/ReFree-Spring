@@ -21,8 +21,6 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final EntityManager en;
 
     // 회원가입
     SingleResponse signup(MemberSignupDto memberSignupDto) {
@@ -50,27 +48,33 @@ public class MemberService {
 
     SingleResponse search(MemberPwSearchDto memberPwSearchDto) {
         memberEntity member = memberPwSearchDto.toEntity();
+        Optional<memberEntity> updateMember = memberRepository.findByEmail(memberPwSearchDto.getEmail());
+        member = updateMember.get();
+
         if (memberRepository.findByEmail(memberPwSearchDto.getEmail()).isPresent() == false){
             throw new MemberException("존재하지 않는 계정입니다.");
         }
+
+        member.updateFlag(1);
+
+        memberRepository.save(member);
 
         SingleResponse singleResponse = new SingleResponse(200, "EMAIL_EXIST");
         return singleResponse;
     }
 
-    SingleResponse modify(String email, MemberPwModifyDto memberPwModifyDto) {
+    SingleResponse modify(MemberPwModifyDto memberPwModifyDto) {
         memberEntity member = memberPwModifyDto.toEntity();
+        Optional<memberEntity> updateMember = memberRepository.findByEmail(memberPwModifyDto.getEmail());
+        member = updateMember.get();
 
-        if (memberRepository.findByEmail(email).isPresent() ==  false || email == null){ // Exception (이미 존재하는 것이 확인된 계정에서만 호출되는 API
+        if (member.getIsChange() == 0){ // Exception (이미 존재하는 것이 확인된 계정에서만 호출되는 API
             throw new MemberException("잘못된 접근입니다.");
         }
 
         if (!memberPwModifyDto.getNewPassword().equals(memberPwModifyDto.getCheckNewPassword())) {
             throw new MemberException("비밀번호가 일치하지 않습니다.");
         }
-
-        Optional<memberEntity> updateMember = memberRepository.findByEmail(email);
-        member = updateMember.get();
 
         // 비밀번호 변경
         member.updatePassword(memberPwModifyDto.getNewPassword());
@@ -82,6 +86,8 @@ public class MemberService {
         // password Encoding
         member.encodePassword(passwordEncoder);
         member.encodeCheckPassword(passwordEncoder);
+
+        member.updateFlag(0);
 
         memberRepository.save(member);
 

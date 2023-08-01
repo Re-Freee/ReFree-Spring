@@ -33,6 +33,13 @@ public class memberEntity {
     @Column(name = "nickname", length = 8, nullable = false)
     private String nickname;
 
+    @Column(name = "is_change", nullable = false)
+    private int isChange;
+
+    public int getIsChange(){
+        return isChange;
+    }
+
     public void encodePassword(PasswordEncoder passwordEncoder){
         this.password = passwordEncoder.encode(password);
     }
@@ -47,5 +54,9 @@ public class memberEntity {
 
     public void updateCheckPassword(String newCheckPassword){
         this.checkPassword = newCheckPassword;
+    }
+
+    public void updateFlag(int isChange){
+        this.isChange = isChange;
     }
 }

@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @Setter
 @Getter
-public class MemberPwSearchDto{
+public class MemberPwSearchDto {
 
     @NotBlank(message = "이메일을 입력해 주세요.")
     @Size(max = 40, message = "이메일은 40자 내로 입력해 주세요.")

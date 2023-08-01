@@ -4,6 +4,7 @@ import backend.refree.infra.exception.ExceptionHandlerFilter;
 import backend.refree.module.Member.MemberRepository;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,8 @@ import org.springframework.web.filter.CorsFilter;
 
 import javax.servlet.Filter;
 
+import java.util.Base64;
+
 import static backend.refree.module.Analysis.KomoranUtils.log;
 
 @RequiredArgsConstructor
@@ -41,6 +44,14 @@ public class SecurityConfig {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final PrincipalDetailsService principalDetailsService;
+    private String secretKey;
+
+    @Bean
+    public String getSecretKey( @Value("${spring.security.jwt.SECRET}") String secretKey){
+        this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        return secretKey;
+    }
+
     @Bean
     public static PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -63,10 +74,10 @@ public class SecurityConfig {
                 .addFilter(corsFilter)
                 .formLogin().disable()
                 .httpBasic().disable()
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(authenticationConfiguration), passwordEncoder, principalDetailsService))
+                .addFilter(new JwtAuthenticationFilter(authenticationManager(authenticationConfiguration), passwordEncoder, principalDetailsService, secretKey))
                 .addFilterBefore(new JwtAuthorizationFilter(authenticationManager(authenticationConfiguration), memberRepository, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new ExceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class);
-
+        // login default page : /login
         return http.build();
     }
 
