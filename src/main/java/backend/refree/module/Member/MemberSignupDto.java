@@ -18,14 +18,14 @@ public class MemberSignupDto{
     private String email;
 
     @NotBlank(message = "비밀번호를 입력해 주세요.")
-    @Size(min = 8, message = "비밀번호는 8자 이상이어야 합니다.")
+    @Size(min = 8, message = "비밀번호는 8자 이상 입력하셔야 합니다.")
     private String password;
 
     @NotBlank(message = "비밀번호를 다시 입력해 주세요.")
     private String checkPassword;
 
     @NotBlank(message = "닉네임을 입력해 주세요.")
-    @Size(min = 2, max = 8, message = "닉네임은 2글자 이상, 8글자 이하여야 합니다.")
+    @Size(min = 2, max = 8, message = "닉네임은 2~8자 이내로 입력하셔야 합니다.")
     private String nickname;
 
     public memberEntity toEntity(){

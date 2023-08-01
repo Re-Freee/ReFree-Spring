@@ -4,22 +4,20 @@ import backend.refree.infra.config.jwt.JwtTokenProvider;
 import backend.refree.infra.exception.MemberException;
 import backend.refree.infra.response.BasicResponse;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.security.Principal;
 
 @RequiredArgsConstructor
 @RestController
-public class Membercontroller {
+public class MemberController {
 
-    private final memberService memberService;
+    private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
@@ -28,13 +26,17 @@ public class Membercontroller {
         return ResponseEntity.ok().body(memberService.signup(memberSignupDto));
     }
 
-    // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<? extends BasicResponse> login(@RequestBody @Valid MemberLoginDto memberLoginDto, HttpServletResponse response) {
-        return ResponseEntity.ok().body(memberService.login(memberLoginDto, response));
+    @PostMapping("/login/search")
+    public ResponseEntity<? extends BasicResponse> search(@RequestBody @Valid MemberPwSearchDto memberPwSearchDto) {
+        return ResponseEntity.ok().body(memberService.search(memberPwSearchDto));
     }
 
-    // 토큰 인가
+    @PostMapping("/login/search/modify")
+    public ResponseEntity<? extends BasicResponse> modify(@RequestBody @Valid MemberPwModifyDto memberPwModifyDto)  {
+        return ResponseEntity.ok().body(memberService.modify(memberPwModifyDto));
+    }
+
+    // 토큰 인가 check 
     @GetMapping("/check")
     public ResponseEntity<? extends BasicResponse> check(Principal principal){
         if (principal == null) throw new MemberException("회원 정보를 찾을 수 없습니다.");
