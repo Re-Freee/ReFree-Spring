@@ -1,7 +1,9 @@
 package backend.refree.infra.config.jwt;
 
+import backend.refree.infra.exception.MemberException;
 import backend.refree.module.Member.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PrincipalDetailsService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
@@ -16,9 +19,9 @@ public class PrincipalDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
         memberEntity member = memberRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자 없음"));
+                .orElseThrow(() -> new MemberException("존재하지 않는 계정입니다."));
 
-        return new SecurityUser(member);
+        return new PrincipalDetails(member);
     }
 
 }
