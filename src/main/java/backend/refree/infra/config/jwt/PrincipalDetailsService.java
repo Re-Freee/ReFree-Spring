@@ -11,14 +11,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class PrincipalDetailsService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
-        memberEntity member = memberRepository.findByEmail(username)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberException("존재하지 않는 계정입니다."));
 
         return new PrincipalDetails(member);

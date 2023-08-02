@@ -1,9 +1,12 @@
 package backend.refree.module.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository <memberEntity, String> {
-    Optional<memberEntity> findByEmail(String email);
+@Transactional(readOnly = true)
+public interface MemberRepository extends JpaRepository <Member, String> {
+    Optional<Member> findByEmail(String email);
 
+    Boolean existsMemberByEmail(String email);
 }

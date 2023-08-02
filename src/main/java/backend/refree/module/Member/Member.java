@@ -5,7 +5,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +14,7 @@ import java.util.UUID;
 @Builder
 @Table(name = "Member")
 @DynamicUpdate
-public class memberEntity {
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -24,7 +23,7 @@ public class memberEntity {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "check_password", nullable = false)
+    @Column(name = "check_password")
     private String checkPassword;
 
     @Column(name = "password", nullable = false)

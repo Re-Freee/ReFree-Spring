@@ -20,8 +20,8 @@ public class MemberPwSearchDto {
     @Email(message = "이메일 형식으로 입력해 주세요.")
     private String email;
 
-    public memberEntity toEntity(){
-        memberEntity member = memberEntity.builder()
+    public Member toEntity(){
+        Member member = Member.builder()
                 .email(email).build();
         return member;
     }

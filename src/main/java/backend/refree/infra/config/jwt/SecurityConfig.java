@@ -1,84 +1,74 @@
 package backend.refree.infra.config.jwt;
 
-import backend.refree.infra.exception.ExceptionHandlerFilter;
-import backend.refree.module.Member.MemberRepository;
-import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsUtils;
-import org.springframework.web.filter.CorsFilter;
-
-import javax.servlet.Filter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.Base64;
 
-import static backend.refree.module.Analysis.KomoranUtils.log;
-
-@RequiredArgsConstructor
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CorsFilter corsFilter;
-    private final AuthenticationConfiguration authenticationConfiguration;
+    private final CorsConfig corsConfig;
     private final JwtTokenProvider jwtTokenProvider;
-    private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final PrincipalDetailsService principalDetailsService;
-    private String secretKey;
+    private final ObjectMapper objectMapper;
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 사용 하지않음
+                .and()
+                .formLogin().disable()
+                .httpBasic().disable()
+                .apply(new CustomDsl())
+                .and()
+                .authorizeRequests()
+                .antMatchers("/signup", "/recipe/recommend").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/myLogout"))
+                .permitAll()
+                /*.and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
+                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))*/
+                .and().build();
+    }
+
+    public class CustomDsl extends AbstractHttpConfigurer<CustomDsl, HttpSecurity> {
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+            http
+                    .addFilter(corsConfig.corsFilter())
+                    .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtTokenProvider, objectMapper))
+                    .addFilter(new JwtAuthorizationFilter(authenticationManager, jwtTokenProvider));
+        }
+    }
 
     @Bean
     public String getSecretKey( @Value("${spring.security.jwt.SECRET}") String secretKey){
-        this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        return secretKey;
+        return Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
     @Bean
     public static PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-        http
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers("/signup", "/login").permitAll() // 설정된 url은 인증되지 않더라도 누구든 접근 가능
-                .and()
-                .addFilter(corsFilter)
-                .formLogin().disable()
-                .httpBasic().disable()
-                .addFilter(new JwtAuthenticationFilter(authenticationManager(authenticationConfiguration), passwordEncoder, principalDetailsService, secretKey))
-                .addFilterBefore(new JwtAuthorizationFilter(authenticationManager(authenticationConfiguration), memberRepository, jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new ExceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class);
-        // login default page : /login
-        return http.build();
     }
 
 }

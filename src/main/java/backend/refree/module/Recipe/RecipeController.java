@@ -2,7 +2,6 @@ package backend.refree.module.Recipe;
 
 import backend.refree.infra.response.BasicResponse;
 import backend.refree.infra.response.GeneralResponse;
-import backend.refree.infra.response.SingleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

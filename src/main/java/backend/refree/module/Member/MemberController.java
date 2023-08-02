@@ -13,12 +13,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.security.Principal;
 
-@RequiredArgsConstructor
 @RestController
+@RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
     @PostMapping("/signup")

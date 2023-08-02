@@ -1,9 +1,7 @@
 package backend.refree.infra.config.jwt;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -19,9 +17,8 @@ public class CorsConfig {
         config.addAllowedOrigin("*");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
-        source.registerCorsConfiguration("/login", config);
+        source.registerCorsConfiguration("/**", config);
 
         return new CorsFilter(source);
     }
-
 }

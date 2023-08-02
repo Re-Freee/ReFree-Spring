@@ -1,8 +1,6 @@
-package backend.refree.infra.exception;
+//package backend.refree.infra.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@ControllerAdvice
+/*@ControllerAdvice
 public class ExceptionHandlerFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -29,6 +27,8 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
             setErrorResponse(response, "INVALID_TOKEN");
         }catch (MemberException e){
             setErrorResponse(response, e.getMessage());
+        }catch (Exception e) {
+            setErrorResponse(response, "UNEXPECTED_ERROR");
         }
     }
     private void setErrorResponse(HttpServletResponse response, String message)
@@ -50,4 +50,4 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         private final Integer code;
         private final String message;
     }
-}
+}*/

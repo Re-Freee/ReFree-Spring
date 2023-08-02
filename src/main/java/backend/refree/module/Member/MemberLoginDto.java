@@ -21,9 +21,9 @@ public class MemberLoginDto{
     @Size(min = 8, message = "비밀번호는 8자 이상 입력하셔야 합니다.")
     private String password;
 
-    public memberEntity toEntity(){
+    public Member toEntity(){
 
-        memberEntity member = memberEntity.builder()
+        Member member = Member.builder()
                 .email(email).password(password).build();
         return member;
 

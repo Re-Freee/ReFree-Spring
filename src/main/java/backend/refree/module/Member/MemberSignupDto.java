@@ -28,14 +28,12 @@ public class MemberSignupDto{
     @Size(min = 2, max = 8, message = "닉네임은 2~8자 이내로 입력하셔야 합니다.")
     private String nickname;
 
-    public memberEntity toEntity(){
+    public Member toEntity(){
 
-        memberEntity member = memberEntity.builder()
+        return Member.builder()
                 .email(email).password(password)
                 .checkPassword(checkPassword)
                 .nickname(nickname).build();
-        return member;
-
     }
 
 }

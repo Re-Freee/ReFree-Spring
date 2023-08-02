@@ -1,18 +1,12 @@
 package backend.refree.module.Member;
 
-import backend.refree.infra.config.jwt.JwtAuthenticationFilter;
-import backend.refree.infra.config.jwt.JwtTokenProvider;
-import backend.refree.infra.config.jwt.PrincipalDetails;
 import backend.refree.infra.exception.MemberException;
 import backend.refree.infra.response.SingleResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 @Service
@@ -22,12 +16,13 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     // 회원가입
-    SingleResponse signup(MemberSignupDto memberSignupDto) {
-        memberEntity member = memberSignupDto.toEntity();
+    @Transactional
+    public SingleResponse signup(MemberSignupDto memberSignupDto) {
 
         // 이미 존재하는 이메일
-        if (memberRepository.findByEmail(memberSignupDto.getEmail()).isPresent()){
+        if (memberRepository.existsMemberByEmail(memberSignupDto.getEmail())){
             throw new MemberException("이미 존재하는 계정입니다.");
         }
 
@@ -36,22 +31,19 @@ public class MemberService {
             throw new MemberException("비밀번호가 일치하지 않습니다.");
         }
 
-        SingleResponse singleResponse = new SingleResponse(201, "Registeration Complete!");
-
+        Member member = memberSignupDto.toEntity();
         member.encodePassword(passwordEncoder);
-        member.encodeCheckPassword(passwordEncoder);
-
         memberRepository.save(member);
 
-        return singleResponse;
+        return new SingleResponse(201, "REGISTRATION_COMPLETE");
     }
 
-    SingleResponse search(MemberPwSearchDto memberPwSearchDto) {
-        memberEntity member = memberPwSearchDto.toEntity();
-        Optional<memberEntity> updateMember = memberRepository.findByEmail(memberPwSearchDto.getEmail());
+    public SingleResponse search(MemberPwSearchDto memberPwSearchDto) {
+        Member member = memberPwSearchDto.toEntity();
+        Optional<Member> updateMember = memberRepository.findByEmail(memberPwSearchDto.getEmail());
         member = updateMember.get();
 
-        if (memberRepository.findByEmail(memberPwSearchDto.getEmail()).isPresent() == false){
+        if (!memberRepository.findByEmail(memberPwSearchDto.getEmail()).isPresent()){
             throw new MemberException("존재하지 않는 계정입니다.");
         }
 
@@ -59,13 +51,12 @@ public class MemberService {
 
         memberRepository.save(member);
 
-        SingleResponse singleResponse = new SingleResponse(200, "EMAIL_EXIST");
-        return singleResponse;
+        return new SingleResponse(200, "EMAIL_EXIST");
     }
 
-    SingleResponse modify(MemberPwModifyDto memberPwModifyDto) {
-        memberEntity member = memberPwModifyDto.toEntity();
-        Optional<memberEntity> updateMember = memberRepository.findByEmail(memberPwModifyDto.getEmail());
+    public SingleResponse modify(MemberPwModifyDto memberPwModifyDto) {
+        Member member = memberPwModifyDto.toEntity();
+        Optional<Member> updateMember = memberRepository.findByEmail(memberPwModifyDto.getEmail());
         member = updateMember.get();
 
         if (member.getIsChange() == 0){ // Exception (이미 존재하는 것이 확인된 계정에서만 호출되는 API
@@ -91,15 +82,13 @@ public class MemberService {
 
         memberRepository.save(member);
 
-        SingleResponse singleResponse = new SingleResponse(200, "PASSWORD_CHANGE");
-        return singleResponse;
+        return new SingleResponse(200, "PASSWORD_CHANGE");
     }
 
-    SingleResponse check(String email) {
-        memberEntity member = memberRepository.findByEmail(email)
+    public SingleResponse check(String email) {
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberException("회원 정보를 찾을 수 없습니다."));
 
-        SingleResponse singleResponse = new SingleResponse(200, member.getEmail());
-        return singleResponse;
+        return new SingleResponse(200, member.getEmail());
     }
 }

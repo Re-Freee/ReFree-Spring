@@ -27,8 +27,8 @@ public class MemberPwModifyDto {
     @NotBlank(message = "새 비밀번호를 다시 입력해 주세요.")
     private String checkNewPassword;
 
-    public memberEntity toEntity(){
-        memberEntity member = memberEntity.builder()
+    public Member toEntity(){
+        Member member = Member.builder()
                 .password(newPassword)
                 .checkPassword(checkNewPassword).build();
         return member;

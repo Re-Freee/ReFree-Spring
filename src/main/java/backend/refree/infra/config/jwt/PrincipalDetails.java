@@ -1,19 +1,16 @@
 package backend.refree.infra.config.jwt;
 
-import backend.refree.module.Member.memberEntity;
-import lombok.Data;
+import backend.refree.module.Member.Member;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.ArrayList;
 import java.util.Collection;
 
-@Data
+@Getter
+@RequiredArgsConstructor
 public class PrincipalDetails implements UserDetails {
-    private final memberEntity member;
-    public PrincipalDetails(memberEntity member){
-        this.member = member;
-    }
+    private final Member member;
 
     @Override
     public String getUsername(){
@@ -45,8 +42,7 @@ public class PrincipalDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        return authorities;
+        return null;
     }
 
 }
