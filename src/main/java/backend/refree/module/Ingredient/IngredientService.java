@@ -5,6 +5,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
@@ -23,13 +24,15 @@ import java.util.*;
 @Transactional
 @Component
 public class IngredientService {
+    @Value("${serviceKey}")
+    private String serviceKey;
     private final IngredientRepository ingredientRepository;
     public IngredientService(IngredientRepository ingredientRepository){
         this.ingredientRepository=ingredientRepository;
     }
     public String ingredientToCategory(String inputs)  throws IOException, ParseException {
         StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1390802/AgriFood/FdFood/getKoreanFoodFdFoodList"); /*URL*/
-        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "=JFijwchWJy3Nc6ZJO%2BLrky1imhAw43gItboKn2EuJbkrJJhPd13DziheNccSaKwmHiPc%2FDz4Jx8Z5mvH5JG5bg%3D%3D"); /*Service Key*/
+        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + "="+serviceKey); /*Service Key*/
         urlBuilder.append("&" + URLEncoder.encode("service_Type","UTF-8") + "=" + URLEncoder.encode("json", "UTF-8")); /*xml 과 json 형식 지원*/
         urlBuilder.append("&" + URLEncoder.encode("Page_No","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지 번호*/
         urlBuilder.append("&" + URLEncoder.encode("Page_Size","UTF-8") + "=" + URLEncoder.encode("20", "UTF-8")); /*한 페이지 결과 수*/
@@ -138,10 +141,22 @@ public class IngredientService {
         //input2[0] : 이 재료의 최종 카테고리로 추가
         ingredientRepository.save(ingredient);
     }
-    public Ingredient view(int ingredient_id){
+    public List<Ingredient> view(int ingredient_id){
         Optional<Ingredient> ingredient2= ingredientRepository.findById(ingredient_id);
         Ingredient ingredient1=ingredient2.get();
-        return ingredient1;
+        List<Ingredient> checked=new ArrayList<>();
+        checked.add(ingredient1);
+        return checked;
+    }
+    public List<Ingredient> delete(int ingred_id, int cnt, String memo){
+        ingredientRepository.delete(ingred_id,cnt,memo);
+        Ingredient check=view(ingred_id).get(0);
+        check.setQuantity(cnt);
+        check.setContent(memo);
+        List<Ingredient> checked=new ArrayList<>();
+        checked.add(check);
+
+        return checked;
     }
     public List<Ingredient> findAllIngredient(int mem_id){
         return ingredientRepository.findAllIngredient(mem_id);
@@ -218,13 +233,7 @@ public class IngredientService {
         }
         return confirm;
     }
-    public Ingredient delete(int ingred_id, int cnt,String memo){
-        ingredientRepository.delete(ingred_id,cnt,memo);
-        Ingredient check=view(ingred_id);
-        check.setQuantity(cnt);
-        check.setContent(memo);
-        return check;
-    }
+
     public List<Ingredient> search(String searchKey,int mem_id){
         String searchKey1="%"+searchKey+"%";
         return ingredientRepository.search(searchKey1,mem_id);
